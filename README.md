@@ -1,0 +1,1 @@
+This is a readme file for challenge 2 we are using python for the first time in this challenge.
