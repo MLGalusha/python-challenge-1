@@ -49,3 +49,42 @@ menu = {
         "Fried banana": 4.49
     }
 }
+
+def check_valid_num(list):
+    # Prompt user to pick one of the categories and check if number is valid
+    while True:
+        user_category = input("\nWhich category would you like to pick?\nType corresponding number: ")
+        try:
+            user_category = int(user_category)
+
+            if 1 <= user_category <= len(list):
+                return user_category
+            else:
+                print(f"Please enter a number between 1 and {len(list)}.")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+
+# Create a loop that only ends when user is done ordering
+while True:
+
+    # Print food categories with corresponding values
+    category_list = [key for key in menu.keys()]
+    for item in category_list:
+        print(f"{category_list.index(item) + 1}. {item}")
+
+# Prompt user to pick one of the categories and check if number is valid
+    user_category = check_valid_num(category_list)
+
+    # Now lets print the menu
+    # Create header names
+    headers = ["ITEM #", "ITEM", "Price"]
+
+    for item, price in menu[category_list[user_category - 1]].items():
+        print(f"Item: {item}   Price: {price}")
+
+    still_ordering = input("\nAre you still ordering? Enter anything to continue or (N)o to end. ")
+    if still_ordering.upper() == "Y":
+        continue
+    elif still_ordering.upper() == "N":
+        print("By have a great time!\n")
+        break
