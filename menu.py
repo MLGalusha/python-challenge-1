@@ -51,7 +51,6 @@ menu = {
 }
 
 def check_valid_num(list, question):
-    # Prompt user to pick one of the categories and check if number is valid
     while True:
         user_choice = input(question)
         try:
@@ -71,15 +70,11 @@ total_price = 0
 
 print("Welcome to the variety food truck.")
 
-# Create a loop that only ends when user is done ordering
 while True:
-
-    # Print food categories with corresponding values
     category_list = [key for key in menu.keys()]
     for idx, item in enumerate(category_list, start=1):
         print(f"{idx}. {item}")
 
-    # Prompt user to pick one of the categories and check if number is valid
     cat_question = "Which category would you like to pick? "
     user_category = check_valid_num(category_list, cat_question)
 
@@ -98,7 +93,6 @@ while True:
             i += 1
     print(divider)
 
-    # Ask which item the user wants to order
     item_question = "Which item would you like to order?  "
     item_num = check_valid_num(item_list, item_question)
 
@@ -112,37 +106,33 @@ while True:
         else:
             print("Invalid input. Please type a valid number.\n")
 
-    # Create a temporary dictionary to store the order and calculate the total price
     tkey, tprice = next(iter(the_item.items()))
     temp_dict = {tkey: [tprice, quantity]}
     total_price += tprice * quantity
     order_list.append(temp_dict)
 
-    # Check if user wants to keep ordering
-    still_ordering = input("\nAre you still ordering? (N)o or enter anything else to continue ordering: ")
-    if still_ordering.upper() == "N":
-        receipt_header = f"{'ITEM':<23} | {'PRICE':<10} | {'QUANTITY':<10}"
-        receipt_divider = "-" * len(receipt_header)
-        print(receipt_divider)
-        print(f"{'RECEIPT':^46}")
-        print(receipt_divider)
-        print(receipt_header)
-        print(receipt_divider)
+    still_ordering = input("\nAre you still ordering? (N)o or enter anything else to continue ordering: ").lower()
+    match still_ordering:
+        case 'n':
+            receipt_header = f"{'ITEM':<23} | {'PRICE':<10} | {'QUANTITY':<10}"
+            receipt_divider = "-" * len(receipt_header)
+            print(receipt_divider)
+            print(f"{'RECEIPT':^46}")
+            print(receipt_divider)
+            print(receipt_header)
+            print(receipt_divider)
 
-        # Unpack the list and dictionary into three separate pieces of data
-        for item in order_list:
-            temp_item_key = list(item.keys())[0]
-            temp_item_price, temp_item_quantity = item[temp_item_key]
-            print(f"{temp_item_key:<23} | {temp_item_price:<10} | {temp_item_quantity:<10}")
-        print(receipt_divider)
+            for item in order_list:
+                temp_item_key = list(item.keys())[0]
+                temp_item_price, temp_item_quantity = item[temp_item_key]
+                print(f"{temp_item_key:<23} | {temp_item_price:<10} | {temp_item_quantity:<10}")
+            print(receipt_divider)
 
-        ready_receipt = input("Are you ready to pay? (Y)es or enter anything else to go back: ").upper()
-        if ready_receipt == "Y":
-            print(f"Your total is ${total_price:.2f}")
-            print("Thank you for your purchase!")
-            break
-        else:
+            ready_receipt = input("Are you ready to pay? (Y)es or enter anything else to go back: ").upper()
+            if ready_receipt == "Y":
+                total_price = sum(price * quantity for item in order_list for price, quantity in item.values())
+                print(f"Your total is ${total_price:.2f}")
+                print("Thank you for your purchase!")
+                break
+        case _:
             continue
-    else:
-        print("continue")
-        continue
