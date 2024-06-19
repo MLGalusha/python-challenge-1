@@ -1,7 +1,5 @@
 # Food Truck Ordering System
 
-This is a readme file for Challenge 2. We are using Python for the first time in this challenge.
-
 ## Steps to Implement the Ordering System
 
 1. **Create a Dictionary for Menu:**
