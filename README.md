@@ -1,68 +1,8 @@
 # Food Truck Ordering System
 
-## Code Explaination
+
 <details>
-  <summary><h3>Menu Dictionary<h3></summary>
-
-  ```python
-  # This is a nested dictionary containg the entire food truck menu
-  menu = {
-    "Snacks": {
-        "Cookie": .99,
-        "Banana": .69,
-        "Apple": .49,
-        "Granola bar": 1.99
-    },
-    "Meals": {
-        "Burrito": 4.49,
-        "Teriyaki Chicken": 9.99,
-        "Sushi": 7.49,
-        "Pad Thai": 6.99,
-        "Pizza": {
-            "Cheese": 8.99,
-            "Pepperoni": 10.99,
-            "Vegetarian": 9.99
-        },
-        "Burger": {
-            "Chicken": 7.49,
-            "Beef": 8.49
-        }
-    },
-    "Drinks": {
-        "Soda": {
-            "Small": 1.99,
-            "Medium": 2.49,
-            "Large": 2.99
-        },
-        "Tea": {
-            "Green": 2.49,
-            "Thai iced": 3.99,
-            "Irish breakfast": 2.49
-        },
-        "Coffee": {
-            "Espresso": 2.99,
-            "Flat white": 2.99,
-            "Iced": 3.49
-        }
-    },
-    "Dessert": {
-        "Chocolate lava cake": 10.99,
-        "Cheesecake": {
-            "New York": 4.99,
-            "Strawberry": 6.49
-        },
-        "Australian Pavlova": 9.99,
-        "Rice pudding": 4.99,
-        "Fried banana": 4.49
-    }
-}
-```
-
-
-</details>
-
-## Steps to Implement the Ordering System
-### Pseudocode
+  <summary><h2>Original Pseudocode<h2></summary>
 
 1. **Create a Dictionary for Menu:**
    - Add a dictionary containing types of foods.
@@ -92,20 +32,57 @@
 
 7. **Calculate and Display Total Price:**
    - Add up the total price and print it out for the user to see.
+</details>
 
 ## Possible Additions
 
 1. **Modify Order:**
-   - Ask if everything on the receipt looks correct.
+   - After displaying the receipt, ask if everything looks correct.
    - If the user responds with "no":
      - Ask which item they would like to modify.
      - Allow them to type the item name and the new quantity.
-     - If the quantity is 0, delete the item from the receipt.
+     - If the quantity is 0, remove the item from the receipt.
+     - If the quantity is more than 0, update the item quantity accordingly.
 
 2. **Payment Process:**
    - Ask the customer if they are ready to pay.
-   - If they say "yes", reprint the modified receipt and prices.
+   - If they say "yes", reprint the final receipt with updated prices.
    - Allow the user to pay with cash:
      - Accept dollar bills: 1, 5, 10, 20, 50, 100.
-     - Accept cents: 0.01, 0.05, 0.10, 0.25.
-   - If they give too much, print out their change.
+     - Accept coins: 0.01, 0.05, 0.10, 0.25.
+   - If they provide too much money, calculate and print out their change.
+
+3. **Check Duplicate Items:**
+   - When an item is added to the cart, check if it is already in the cart.
+   - If it is, update the quantity of the existing item instead of adding a duplicate.
+   - This prevents duplicate items on the receipt and keeps the order organized.
+
+4. **Add "Back Out" of Menu Category:**
+   - Allow the user to input "B" to back out of a menu category if they don't want to order anything from it.
+   - This provides flexibility for users who may change their mind after selecting a category.
+
+5. **Cancel or End Anytime:**
+   - Provide an option to cancel the order at any time by inputting "L" to leave.
+   - Display a thank you message when the user leaves without completing the order.
+   - Allow users to finish their order anytime by inputting "F".
+   - If the user inputs "F", confirm if they are sure they are done ordering.
+   - If they confirm by typing "Y", skip to displaying the receipt.
+
+6. **View Cart:**
+   - Allow users to view their current cart at any time by inputting "V".
+   - This helps users keep track of their order and make adjustments if necessary.
+
+7. **Special Instructions:**
+   - Provide an option for users to add special instructions for their order (e.g., no onions, extra cheese).
+   - This can be done after selecting the quantity of an item.
+
+8. **HELP:**
+   - Allow the user to type "help" at any time to display a help menu.
+   - The help menu will show all available options and how to use them.
+   - Explain what each input does, such as:
+     - "B" to back out of a category
+     - "L" to cancel the order
+     - "F" to finish ordering
+     - etc....
+   - These inputs can be used at any time during the ordering process.
+   - If the user types "help" while in the middle of ordering, they can press "return" or any other unused key to return to where they left off.
