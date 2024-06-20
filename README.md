@@ -2,7 +2,7 @@
 
 ## Code Explaination
 <details>
-  <summary>Menu Dictionary</summary>
+  <summary><h3>Menu Dictionary<h3></summary>
 
   ```python
   # This is a nested dictionary containg the entire food truck menu
@@ -57,7 +57,10 @@
     }
 }
 ```
+
+
 </details>
+
 ## Steps to Implement the Ordering System
 ### Pseudocode
 
