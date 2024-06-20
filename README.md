@@ -2,7 +2,7 @@
 
 
 <details>
-  <summary><h2>Original Pseudocode<h2></summary>
+  <summary><h2> ∆ Original Pseudocode ∆<h2></summary>
 
 1. **Create a Dictionary for Menu:**
    - Add a dictionary containing types of foods.
