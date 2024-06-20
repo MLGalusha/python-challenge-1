@@ -56,8 +56,8 @@
         "Fried banana": 4.49
     }
 }
-</details>
 ```
+</details>
 ## Steps to Implement the Ordering System
 ### Pseudocode
 
