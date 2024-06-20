@@ -61,7 +61,7 @@ def display_categories(menu):
 
 def check_valid_num(list, question):
     while True:
-        user_choice = input(question)
+        user_choice = handle_special_inputs(input(question))
         try:
             user_choice = int(user_choice)
             if 1 <= user_choice <= len(list):
@@ -122,6 +122,38 @@ def print_receipt(order_list):
         temp_item_price, temp_item_quantity = item[temp_item_key]
         print(f"{temp_item_key:<23} | {temp_item_price:<10} | {temp_item_quantity:<10}")
     print(receipt_divider)
+
+def _helper_menu():
+    header = f"{'HELP MENU':^35}"
+    divider = "-"*(len(header))
+    print(f"|{divider}|\n|{header}|\n|{divider}|")
+    print(f'| Type: "B" to back out of category |\n|{" "*len(header)}|')
+    print(f'| Type: "C" to cancel your order    |\n|{" "*len(header)}|')
+    print(f'| Type: "V" to view your cart       |\n|{" "*len(header)}|')
+    print(f'| Type: "F" to finish your order    |\n|{" "*len(header)}|')
+    print(f'| Type: "HELP" to see the help menu |\n|{divider}|')
+    input(f"|{' ':35}|\n|{'ENTER ANYTHING TO RETURN':^35}|\n|{' ':35}|\n|{divider}|\n")
+    return
+
+
+def handle_special_inputs(user_input):
+    try:
+        user_input = user_input.upper()
+        match user_input:
+            case 'HELP':
+                _helper_menu()
+            case 'B':
+                print("Back Out")
+            case 'C':
+                print("Cancel Order")
+            case 'V':
+                print("View Cart")
+            case 'F':
+                print("Finish Order")
+            case _:
+                return user_input
+    except AttributeError:
+        return user_input
 
 def main():
     print("Welcome to the variety food truck.")
