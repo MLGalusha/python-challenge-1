@@ -63,9 +63,8 @@ def display_categories(menu):
 
 def check_valid_num(list, question):
     # Check if user input is valid based on the presented options
-    # If user input isn't a number reprompt the user
-    # If user input isn't within range of option reprompt the user
     while True:
+        # Use input to reprompt the user when input is invalid
         user_choice = input(question)
         try:
             user_choice = int(user_choice)
