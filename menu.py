@@ -1,3 +1,5 @@
+import sys
+
 # Menu dictionary
 menu = {
     "Snacks": {
@@ -50,127 +52,200 @@ menu = {
     }
 }
 
-# UNIVERSAL THINGS
+# UNIVERSAL
+order_list = []
 total_price = 0
 
 def display_categories(menu):
-    # Print out the categories with corresponding numbers
-    # return the list to main
+    """Display all categories from the menu."""
     category_list = [key for key in menu.keys()]
     for idx, item in enumerate(category_list, start=1):
         print(f"{idx}. {item}")
     return category_list
 
-def check_valid_num(list, question):
-    # Check if user input is valid based on the presented options
+def _reprint(context_function, context_arg=None):
+    """Helper Function: Reprints the prompt user was currently on"""
+    if context_arg:
+        context_function(context_arg, menu)
+        return
+    try:
+        context_function(menu)
+        return
+    except TypeError:
+        return
+
+def _cancel_order():
+    """Asks user if they are sure they want to cancel order. Responds accordingly"""
+    cancel = input("Type (C) to confirm canceling order. ")
+    if cancel.upper() == "C":
+        print("Bye have a great day!")
+        sys.exit()
+
+
+def check_valid_input(question, list=None, context_function=None, context_arg=None):
+    """
+    Prompt the user with a question and check if the input is a valid
+    If list provided in argument check if input is a valid number within the range of the provided list.
+    Returns the valid user input.
+    """
+    global total_price
+
     while True:
-        # Use input to reprompt the user when input is invalid
         user_choice = input(question)
-        try:
-            user_choice = int(user_choice)
-            if 1 <= user_choice <= len(list):
-                return user_choice
-            else:
-                print(f"Please enter a number between 1 and {len(list)}.\n")
-        except ValueError:
-            print("Invalid input. Please enter a valid number.\n")
+        match user_choice.upper():
+            case "B":
+                if question == "Which category would you like to pick? ":
+                    print("You can't go back anymore.")
+                    continue
+                back_out = input("Type (B) to confirm and go back to menu categories. ")
+                if back_out.upper() == "B":
+                    return "B"
+                _reprint(context_function, context_arg)
+                continue
+            case "C":
+                _cancel_order()
+                _reprint(context_function, context_arg)
+                continue
+            case "V":
+                print_receipt()
+                print(" ")
+                _reprint(context_function, context_arg)
+                continue
+            case "F":
+                if total_price == 0:
+                    _cancel_order()
+                print_receipt()
+                confirm_finish()
+                _reprint(context_function, context_arg)
+                continue
+            case "HELP":
+                display_help()
+                _reprint(context_function, context_arg)
+                continue
+        if list:
+            try:
+                user_choice = int(user_choice)
+                if 1<= user_choice <= len(list):
+                    return user_choice
+                else:
+                    print(f"Invalid input. Please enter a number between 1 and {len(list)}.\n")
+            except ValueError:
+                print("Invalid input. Please enter a valid number.\n")
+        else:
+            return user_choice
 
 def display_items(category, menu):
-    # Display the items from the category the user picked
-
-    header = f"{'ITEM #':<6} | {'ITEM':<23} | {'PRICE':<10}"
-    divider = "-" * len(header)
+    """
+    Display all items in the specified category of the menu.
+    Returns a list of items in the category in order.
+    """
+    header = f'{"ITEM #":<6} | {"ITEM":<23} | {"PRICE":<10}'
+    divider = "-"*len(header)
     print(f"{divider}\n{header}\n{divider}")
 
-    i = 1
     item_list = []
-    # Create a loop that prints out each item in specified column
-    for item, price in menu[category].items():
-        # Check if data has is has a nested dict or not and print out accordingly
-        if isinstance(price, dict):
-            for item_sub, price_sub in price.items():
-                item_list.append({f"{item} - {item_sub}": price_sub})
-                print(f"{i:<6} | {f'{item} - {item_sub}':<23} | {price_sub:<10}")
+    i = 1
+    for key, value in menu[category].items():
+        if type(value) is dict:
+            for item, price in value.items():
+                item_list.append({f"{key} - {item}": price})
+                print(f"{i:<6} | {f'{key} - {item}':<23} | {price:<9.2f}")
                 i += 1
         else:
-            item_list.append({item: price})
-            print(f"{i:<6} | {item:<23} | {price:<10}")
+            item_list.append({key: value})
+            print(f"{i:<6} | {key:<23} | {value:<9.2f}")
             i += 1
     print(divider)
     return item_list
 
-def get_user_order(item_list):
-    # Ask the user what item they want and how many then return the data
-    # Find which item the user wants to order
-    item_question = "Which item would you like to order?  "
-    item_num = check_valid_num(item_list, item_question)
-
-    # Unpack the item and ask for the quantity of that item
+def get_user_order(item_list, category): #c----------------
+    """
+    Prompt the user to select an item from the list and specify the quantity.
+    Returns a dictionary representing the selected item and its quantity.
+    """
+    global total_price
+    question = "Which item would you like to order? "
+    item_num = check_valid_input(question, item_list, display_items, category)
+    if item_num == "B":
+        return item_num
     while True:
-        the_item = item_list[item_num - 1]
-        the_key = list(the_item.keys())[0]
-        quantity = input(f"How many {the_key}s would you like to order? ")
-        if quantity.isdigit() and int(quantity) >= 1:
-            quantity = int(quantity)
+        item = item_list[item_num - 1]
+        key = list(item.keys())[0]
+        quantity = check_valid_input(f"How many {key}s would you like to order? ", list(range(1, 201)))
+        if quantity == "B":
+            return quantity
+        if quantity:
             break
-        else:
-            print("Invalid input. Please type a valid number.\n")
 
-    # Get the key, and price of the item the user chose then repack those as
-    # well as quantity in a return value
-    tkey, tprice = next(iter(the_item.items()))
-    return {tkey: [tprice, quantity]}
+    key, price = next(iter(item.items()))
+    total_price += price * quantity
+    return {key: [price, quantity]}
 
-def print_receipt(order_list):
-    # Print receipt in a nice clean format
-    receipt_header = f"{'ITEM':<23} | {'PRICE':<10} | {'QUANTITY':<10}"
-    receipt_divider = "-" * len(receipt_header)
-    print(receipt_divider)
-    print(f"{'RECEIPT':^46}")
-    print(receipt_divider)
-    print(receipt_header)
-    print(receipt_divider)
+def print_receipt():
+    """
+    Print a receipt of all items in the global order_list with their quantities and prices.
+    """
+    global order_list
+    header = f"{'ITEM':<23} | {'PRICE':<7} | {'QUANTITY':<10}"
 
-    # Unpack items in the order_list and print them out neatly
+    divider = "-"*len(header)
+    print(f"{divider}\n{'RECEIPT':^36}\n{divider}\n{header}\n{divider}")
+
     for item in order_list:
-        temp_item_key = list(item.keys())[0]
-        temp_item_price, temp_item_quantity = item[temp_item_key]
-        print(f"{temp_item_key:<23} | {temp_item_price:<10} | {temp_item_quantity:<10}")
-    print(receipt_divider)
+        for name, data in item.items():
+                price, quantity = data
+                print(f"{name:<23} | {price:<7} | {quantity:<10}")
+    print(divider)
+
+def confirm_finish():
+    """
+    Ask the user if they are finished ordering.
+    If confirmed, print the total price and end the ordering process.
+    """
+    global total_price
+
+    confirm = input("Are you sure you want to finish ordering? (Y)es or enter anything to keep ordering: ")
+    if confirm.upper() == 'Y':
+        print(f"Your total is ${total_price:,.2f}\nThank you for ordering! Have a great day!")
+        sys.exit()
+    else:
+        return
+
+def display_help():
+    header = f"{'HELP MENU':^35}"
+    divider = "-"*(len(header))
+    print(f"|{divider}|\n|{header}|\n|{divider}|")
+    print(f'| Type: "B" to back out of category |\n|{" "*len(header)}|')
+    print(f'| Type: "C" to cancel your order    |\n|{" "*len(header)}|')
+    print(f'| Type: "V" to view your cart       |\n|{" "*len(header)}|')
+    print(f'| Type: "F" to finish your order    |\n|{" "*len(header)}|')
+    print(f'| Type: "HELP" to see the help menu |\n|{divider}|')
+    input(f"|{' ':35}|\n|{'ENTER ANYTHING TO CONTINUE':^35}|\n|{' ':35}|\n|{divider}|\n")
+
 
 def main():
-    # Welcome the user and create the cart
-    print("Welcome to the variety food truck.")
-    order_list = []
+    global order_list
+    global total_price
+    print("Welcome to the variety food truck. ")
 
     while True:
-        # Create a loop that runs until the user is done ordering
         category_list = display_categories(menu)
-
-        cat_question = "Which category would you like to pick? "
-        user_category = check_valid_num(category_list, cat_question)
+        user_category = check_valid_input("Which category would you like to pick? ", category_list, display_categories)
+        if user_category == "B":
+            continue
 
         item_list = display_items((category_list[user_category - 1]), menu)
-        order = get_user_order(item_list)
+        order = get_user_order(item_list, category_list[user_category - 1])
+        if order == "B":
+            continue
+
         order_list.append(order)
+        keep_ordering = check_valid_input("Do you want to keep ordering? (N)o or enter anything to continue: ")
+        if keep_ordering.upper() == 'N':
+            print_receipt()
+            confirm_finish()
+            continue
 
-        # Ask the user if they are still ordering and either print receipt or keep ordering based on response
-        still_ordering = input("\nAre you still ordering? (N)o or enter anything else to continue ordering: ").lower()
-        match still_ordering:
-            case 'n':
-                print_receipt(order_list)
-
-                # The user is seeing the receipt right now
-                # Ask the user if they are ready to pay(show price end program) or not(return to ordering)
-                ready_to_pay = input("Are you ready to pay? (Y)es or enter anything else to go back: ").upper()
-                match ready_to_pay:
-                    case 'Y':
-                        total_price = sum(price * quantity for item in order_list for price, quantity in item.values())
-                        print(f"Your total is ${total_price:.2f}")
-                        print("Thank you for your purchase!")
-                        break
-            case _:
-                continue
 
 
 
