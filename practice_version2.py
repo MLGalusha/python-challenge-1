@@ -1,3 +1,5 @@
+import sys
+
 # Menu dictionary
 menu = {
     "Snacks": {
@@ -61,21 +63,76 @@ def display_categories(menu):
         print(f"{idx}. {item}")
     return category_list
 
-def check_valid_num(list, question):
+def _reprint(context_function, context_arg=None):
+    """Helper Function: Reprints the prompt user was currently on"""
+    if context_arg:
+        context_function(context_arg, menu)
+        return
+    try:
+        context_function(menu)
+        return
+    except TypeError:
+        return
+
+def _cancel_order():
+    """Asks user if they are sure they want to cancel order. Responds accordingly"""
+    cancel = input("Type (C) to confirm canceling order. ")
+    if cancel.upper() == "C":
+        print("Bye have a great day!")
+        sys.exit()
+
+
+def check_valid_input(question, list=None, context_function=None, context_arg=None):
     """
-    Prompt the user with a question and check if the input is a valid number within the range of the provided list.
+    Prompt the user with a question and check if the input is a valid
+    If list provided in argument check if input is a valid number within the range of the provided list.
     Returns the valid user input.
     """
+    global total_price
+
     while True:
-        user_choice = input(question).upper()
-        try:
-            user_choice = int(user_choice)
-            if 1<= user_choice <= len(list):
-                return user_choice
-            else:
-                print(f"Invalid input. Please enter a number between 1 and {len(list)}.\n")
-        except ValueError:
-            print("Invalid input. Please enter a valid number.\n")
+        user_choice = input(question)
+        match user_choice.upper():
+            case "B":
+                if question == "Which category would you like to pick? ":
+                    print("You can't go back anymore.")
+                    continue
+                back_out = input("Type (B) to confirm and go back to menu categories. ")
+                if back_out.upper() == "B":
+                    return "B"
+                _reprint(context_function, context_arg)
+                continue
+            case "C":
+                _cancel_order()
+                _reprint(context_function, context_arg)
+                continue
+            case "V":
+                print_receipt()
+                print(" ")
+                _reprint(context_function, context_arg)
+                continue
+            case "F":
+                if total_price == 0:
+                    _cancel_order()
+                print_receipt()
+                confirm_finish()
+                _reprint(context_function, context_arg)
+                continue
+            case "HELP":
+                display_help()
+                _reprint(context_function, context_arg)
+                continue
+        if list:
+            try:
+                user_choice = int(user_choice)
+                if 1<= user_choice <= len(list):
+                    return user_choice
+                else:
+                    print(f"Invalid input. Please enter a number between 1 and {len(list)}.\n")
+            except ValueError:
+                print("Invalid input. Please enter a valid number.\n")
+        else:
+            return user_choice
 
 def display_items(category, menu):
     """
@@ -101,19 +158,22 @@ def display_items(category, menu):
     print(divider)
     return item_list
 
-def get_user_order(item_list, category):
+def get_user_order(item_list, category): #c----------------
     """
     Prompt the user to select an item from the list and specify the quantity.
     Returns a dictionary representing the selected item and its quantity.
     """
     global total_price
     question = "Which item would you like to order? "
-    item_num = check_valid_num(item_list, question)
-
+    item_num = check_valid_input(question, item_list, display_items, category)
+    if item_num == "B":
+        return item_num
     while True:
         item = item_list[item_num - 1]
         key = list(item.keys())[0]
-        quantity = check_valid_num(list(range(1, 201)), f"How many {key}s would you like to order? ")
+        quantity = check_valid_input(f"How many {key}s would you like to order? ", list(range(1, 201)))
+        if quantity == "B":
+            return quantity
         if quantity:
             break
 
@@ -147,9 +207,21 @@ def confirm_finish():
     confirm = input("Are you sure you want to finish ordering? (Y)es or enter anything to keep ordering: ")
     if confirm.upper() == 'Y':
         print(f"Your total is ${total_price:,.2f}\nThank you for ordering! Have a great day!")
-        return "Finish"
+        sys.exit()
     else:
         return
+
+def display_help():
+    header = f"{'HELP MENU':^35}"
+    divider = "-"*(len(header))
+    print(f"|{divider}|\n|{header}|\n|{divider}|")
+    print(f'| Type: "B" to back out of category |\n|{" "*len(header)}|')
+    print(f'| Type: "C" to cancel your order    |\n|{" "*len(header)}|')
+    print(f'| Type: "V" to view your cart       |\n|{" "*len(header)}|')
+    print(f'| Type: "F" to finish your order    |\n|{" "*len(header)}|')
+    print(f'| Type: "HELP" to see the help menu |\n|{divider}|')
+    input(f"|{' ':35}|\n|{'ENTER ANYTHING TO CONTINUE':^35}|\n|{' ':35}|\n|{divider}|\n")
+
 
 def main():
     global order_list
@@ -158,20 +230,21 @@ def main():
 
     while True:
         category_list = display_categories(menu)
-        category_question = "Which category would you like to pick? "
-        user_category = check_valid_num(category_list, category_question)
+        user_category = check_valid_input("Which category would you like to pick? ", category_list, display_categories)
+        if user_category == "B":
+            continue
 
         item_list = display_items((category_list[user_category - 1]), menu)
         order = get_user_order(item_list, category_list[user_category - 1])
-        order_list.append(order)
+        if order == "B":
+            continue
 
-        keep_ordering = input("Do you want to keep ordering? (N)o or enter anything to continue: ")
+        order_list.append(order)
+        keep_ordering = check_valid_input("Do you want to keep ordering? (N)o or enter anything to continue: ")
         if keep_ordering.upper() == 'N':
             print_receipt()
-            if confirm_finish() != None:
-                break
-            else:
-                continue
+            confirm_finish()
+            continue
 
 
 
