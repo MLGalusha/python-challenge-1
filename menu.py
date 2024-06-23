@@ -1,5 +1,3 @@
-import sys
-
 # Menu dictionary
 menu = {
     "Snacks": {
@@ -52,202 +50,157 @@ menu = {
     }
 }
 
-# UNIVERSAL
-order_list = []
-total_price = 0
+# 1. Set up order list. Order list will store a list of dictionaries for
+# menu item name, item price, and quantity ordered
+order = []
 
-def display_categories(menu):
-    """Display all categories from the menu."""
-    category_list = [key for key in menu.keys()]
-    for idx, item in enumerate(category_list, start=1):
-        print(f"{idx}. {item}")
-    return category_list
+# Launch the store and present a greeting to the customer
+print("Welcome to the variety food truck.")
 
-def _reprint(context_function, context_arg=None):
-    """Helper Function: Reprints the prompt user was currently on"""
-    if context_arg:
-        context_function(context_arg, menu)
-        return
-    try:
-        context_function(menu)
-        return
-    except TypeError:
-        return
+# Customers may want to order multiple items, so let's create a continuous
+# loop
+place_order = True
+while place_order:
+    # Ask the customer from which menu category they want to order
+    print("From which menu would you like to order? ")
 
-def _cancel_order():
-    """Asks user if they are sure they want to cancel order. Responds accordingly"""
-    cancel = input("Type (C) to confirm canceling order. ")
-    if cancel.upper() == "C":
-        print("Bye have a great day!")
-        sys.exit()
-
-
-def check_valid_input(question, list=None, context_function=None, context_arg=None):
-    """
-    Prompt the user with a question and check if the input is a valid
-    If list provided in argument check if input is a valid number within the range of the provided list.
-    Returns the valid user input.
-    """
-    global total_price
-
-    while True:
-        user_choice = input(question)
-        match user_choice.upper():
-            case "B":
-                if question == "Which category would you like to pick? ":
-                    print("You can't go back anymore.")
-                    continue
-                back_out = input("Type (B) to confirm and go back to menu categories. ")
-                if back_out.upper() == "B":
-                    return "B"
-                _reprint(context_function, context_arg)
-                continue
-            case "C":
-                _cancel_order()
-                _reprint(context_function, context_arg)
-                continue
-            case "V":
-                print_receipt()
-                print(" ")
-                _reprint(context_function, context_arg)
-                continue
-            case "F":
-                if total_price == 0:
-                    _cancel_order()
-                print_receipt()
-                confirm_finish()
-                _reprint(context_function, context_arg)
-                continue
-            case "HELP":
-                display_help()
-                _reprint(context_function, context_arg)
-                continue
-        if list:
-            try:
-                user_choice = int(user_choice)
-                if 1<= user_choice <= len(list):
-                    return user_choice
-                else:
-                    print(f"Invalid input. Please enter a number between 1 and {len(list)}.\n")
-            except ValueError:
-                print("Invalid input. Please enter a valid number.\n")
-        else:
-            return user_choice
-
-def display_items(category, menu):
-    """
-    Display all items in the specified category of the menu.
-    Returns a list of items in the category in order.
-    """
-    header = f'{"ITEM #":<6} | {"ITEM":<23} | {"PRICE":<10}'
-    divider = "-"*len(header)
-    print(f"{divider}\n{header}\n{divider}")
-
-    item_list = []
+    # Create a variable for the menu item number
     i = 1
-    for key, value in menu[category].items():
-        if type(value) is dict:
-            for item, price in value.items():
-                item_list.append({f"{key} - {item}": price})
-                print(f"{i:<6} | {f'{key} - {item}':<23} | {price:<9.2f}")
-                i += 1
+    # Create a dictionary to store the menu for later retrieval
+    menu_items = {}
+
+    # Print the options to choose from menu headings (all the first level
+    # dictionary items in menu).
+    for key in menu.keys():
+        print(f"{i}: {key}")
+        # Store the menu category associated with its menu item number
+        menu_items[i] = key
+        # Add 1 to the menu item number
+        i += 1
+
+    # Get the customer's input
+    menu_category = input("Type menu number: ")
+
+    # Check if the customer's input is a number
+    if menu_category.isdigit():
+        # Check if the customer's input is a valid option
+        if int(menu_category) in menu_items.keys():
+            # Save the menu category name to a variable
+            menu_category_name = menu_items[int(menu_category)]
+            # Print out the menu category name they selected
+            print(f"You selected {menu_category_name}")
+
+            # Print out the menu options from the menu_category_name
+            print(f"What {menu_category_name} item would you like to order?")
+            i = 1
+            menu_items = {}
+            print("Item # | Item name                | Price")
+            print("-------|--------------------------|-------")
+            for key, value in menu[menu_category_name].items():
+                # Check if the menu item is a dictionary to handle differently
+                if type(value) is dict:
+                    for key2, value2 in value.items():
+                        num_item_spaces = 24 - len(key + key2) - 3
+                        item_spaces = " " * num_item_spaces
+                        print(f"{i}      | {key} - {key2}{item_spaces} | ${value2}")
+                        menu_items[i] = {
+                            "Item name": key + " - " + key2,
+                            "Price": value2
+                        }
+                        i += 1
+                else:
+                    num_item_spaces = 24 - len(key)
+                    item_spaces = " " * num_item_spaces
+                    print(f"{i}      | {key}{item_spaces} | ${value}")
+                    menu_items[i] = {
+                        "Item name": key,
+                        "Price": value
+                    }
+                    i += 1
+            # 2. Ask customer to input menu item number
+            while True:
+                try:
+                    # 3. Check if the customer typed a number
+                    menu_selection = int(input("Which item would you like to select: "))
+
+                    # 4. Check if the menu selection is in the menu items
+                    quantity = input(f"How many {menu_items[menu_selection]['Item name']}s do you want to order? ")
+                    if quantity.isdigit() and int(quantity) >= 1:
+                        quantity = int(quantity)
+                        break
+                    else:
+                        quantity = 1
+                        break
+                except (ValueError, KeyError):
+                    print("Invalid Input. Please enter a valid number.\n")
+                    continue
+
+            # Add the item name, price, and quantity to the order list
+            order.append({
+                "Item name": menu_items[menu_selection]["Item name"],
+                "Price": menu_items[menu_selection]["Price"],
+                "Quantity": quantity
+            })
+
         else:
-            item_list.append({key: value})
-            print(f"{i:<6} | {key:<23} | {value:<9.2f}")
-            i += 1
-    print(divider)
-    return item_list
-
-def get_user_order(item_list, category): #c----------------
-    """
-    Prompt the user to select an item from the list and specify the quantity.
-    Returns a dictionary representing the selected item and its quantity.
-    """
-    global total_price
-    question = "Which item would you like to order? "
-    item_num = check_valid_input(question, item_list, display_items, category)
-    if item_num == "B":
-        return item_num
-    while True:
-        item = item_list[item_num - 1]
-        key = list(item.keys())[0]
-        quantity = check_valid_input(f"How many {key}s would you like to order? ", list(range(1, 201)))
-        if quantity == "B":
-            return quantity
-        if quantity:
-            break
-
-    key, price = next(iter(item.items()))
-    total_price += price * quantity
-    return {key: [price, quantity]}
-
-def print_receipt():
-    """
-    Print a receipt of all items in the global order_list with their quantities and prices.
-    """
-    global order_list
-    header = f"{'ITEM':<23} | {'PRICE':<7} | {'QUANTITY':<10}"
-
-    divider = "-"*len(header)
-    print(f"{divider}\n{'RECEIPT':^36}\n{divider}\n{header}\n{divider}")
-
-    for item in order_list:
-        for name, data in item.items():
-                price, quantity = data
-                print(f"{name:<23} | {price:<7} | {quantity:<10}")
-    print(divider)
-
-def confirm_finish():
-    """
-    Ask the user if they are finished ordering.
-    If confirmed, print the total price and end the ordering process.
-    """
-    global total_price
-
-    confirm = input("Are you sure you want to finish ordering? (Y)es or enter anything to keep ordering: ")
-    if confirm.upper() == 'Y':
-        print(f"Your total is ${total_price:,.2f}\nThank you for ordering! Have a great day!")
-        sys.exit()
+            # Tell the customer they didn't select a menu option
+            print(f"{menu_category} was not a menu option.")
+            continue
     else:
-        return
-
-def display_help():
-    header = f"{'HELP MENU':^35}"
-    divider = "-"*(len(header))
-    print(f"|{divider}|\n|{header}|\n|{divider}|")
-    print(f'| Type: "B" to back out of category |\n|{" "*len(header)}|')
-    print(f'| Type: "C" to cancel your order    |\n|{" "*len(header)}|')
-    print(f'| Type: "V" to view your cart       |\n|{" "*len(header)}|')
-    print(f'| Type: "F" to finish your order    |\n|{" "*len(header)}|')
-    print(f'| Type: "HELP" to see the help menu |\n|{divider}|')
-    input(f"|{' ':35}|\n|{'ENTER ANYTHING TO CONTINUE':^35}|\n|{' ':35}|\n|{divider}|\n")
-
-
-def main():
-    global order_list
-    global total_price
-    print("Welcome to the variety food truck. ")
+        # Tell the customer they didn't select a number
+        print("You didn't select a number.")
+        continue
 
     while True:
-        category_list = display_categories(menu)
-        user_category = check_valid_input("Which category would you like to pick? ", category_list, display_categories)
-        if user_category == "B":
-            continue
+        # Ask the customer if they would like to order anything else
+        keep_ordering = input("Would you like to keep ordering? (Y)es or (N)o ")
 
-        item_list = display_items((category_list[user_category - 1]), menu)
-        order = get_user_order(item_list, category_list[user_category - 1])
-        if order == "B":
-            continue
+        # 5. Check the customer's input
+        match keep_ordering.lower():
+            case 'y':
+                # Keep ordering
+                break
+            case 'n':
+                # Complete the order
+                place_order = False
+                # Since the customer decided to stop ordering, thank them for
+                # their order
+                print("Thank you for your order.")
+                # Exit the keep ordering question loop
+                break
+            case _:
+                # Tell the customer to try again
+                print("Invalid input. Please enter 'Y' or 'N'.")
 
-        order_list.append(order)
-        keep_ordering = check_valid_input("Do you want to keep ordering? (N)o or enter anything to continue: ")
-        if keep_ordering.upper() == 'N':
-            print_receipt()
-            confirm_finish()
-            continue
+# Print out the customer's order
+print("This is what we are preparing for you.\n")
 
+# Uncomment the following line to check the structure of the order
+#print(order)
 
+print("Item name                 | Price  | Quantity")
+print("--------------------------|--------|----------")
 
+# 6. Loop through the items in the customer's order
+for item in order:
+    # 7. Store the dictionary items as variables
+    item_name = item["Item name"]
+    price = item["Price"]
+    quantity = item["Quantity"]
 
-if __name__ =="__main__":
-    main()
+    # 8. Calculate the number of spaces for formatted printing
+    name_spaces = 26 - len(item_name)
+    price_spaces = 8 - len(f"${price:.2f}")
+
+    # 9. Create space strings
+    name_space_string = " " * name_spaces
+    price_space_string = " " * price_spaces
+
+    # 10. Print the item name, price, and quantity
+    print(f"{item_name}{name_space_string}| ${price:.2f}{price_space_string}| {quantity}")
+
+# 11. Calculate the cost of the order using list comprehension
+# Multiply the price by quantity for each item in the order list, then sum()
+# and print the prices.
+total_cost = sum(item["Price"] * item["Quantity"] for item in order)
+print(f"\nTotal cost: ${total_cost:.2f}")
