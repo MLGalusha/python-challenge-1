@@ -131,6 +131,9 @@ def check_valid_input(question, list=None, context_function=None, context_arg=No
                     print(f"Invalid input. Please enter a number between 1 and {len(list)}.\n")
             except ValueError:
                 print("Invalid input. Please enter a valid number.\n")
+                if context_function == display_categories:
+                    _reprint(context_function(menu))
+
         else:
             return user_choice
 
@@ -158,7 +161,7 @@ def display_items(category, menu):
     print(divider)
     return item_list
 
-def get_user_order(item_list, category): #c----------------
+def get_user_order(item_list, category):
     """
     Prompt the user to select an item from the list and specify the quantity.
     Returns a dictionary representing the selected item and its quantity.
@@ -245,8 +248,6 @@ def main():
             print_receipt()
             confirm_finish()
             continue
-
-
 
 
 if __name__ =="__main__":
